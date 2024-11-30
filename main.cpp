@@ -6,10 +6,11 @@
 #include <algorithm>
 #include <map>
 #include <functional>
-#include <stack>
 #include <cctype>
 
 using namespace std;
+
+double eval_(const string& func_name, const string& args_str);
 
 double factorial(double n) {
     if (n < 0) return NAN;
@@ -29,8 +30,8 @@ double minimum(const vector<double>& values) {
 
 map<string, function<double(vector<double>)>> FUNCTIONS = {
         {"abs", [](vector<double> args) { return fabs(args[0]); }},
-        {"max", [](vector<double> args) { return maximum(args); }},
-        {"min", [](vector<double> args) { return minimum(args); }},
+        {"max", [](const vector<double>& args) { return maximum(args); }},
+        {"min", [](const vector<double>& args) { return minimum(args); }},
         {"sqrt", [](vector<double> args) { return sqrt(args[0]); }},
         {"round", [](vector<double> args) { return round(args[0]); }},
         {"pow", [](vector<double> args) { return pow(args[0], args[1]); }},
@@ -43,22 +44,53 @@ map<string, function<double(vector<double>)>> FUNCTIONS = {
 
 vector<string> history;
 
-string preprocess_expression(string expression) {
-    size_t pos = expression.find("!");
+string preprocess(string expression) {
+    size_t pos = expression.find("**");
     while (pos != string::npos) {
-        if (pos > 0 && isdigit(expression[pos - 1])) {
-            expression.replace(pos, 1, " !");
-        } else {
-            expression.erase(pos, 1);
-        }
-        pos = expression.find("!");
+        expression.replace(pos, 2, "^");
+        pos = expression.find("**");
     }
     return expression;
 }
 
-double evaluateFunction(string func_name, const string& args_str) {
+double calculate(string expression) {
+    try {
+        expression = preprocess(expression);
+
+        if (expression[0] == '!') {
+            double num = stod(expression.substr(1));
+            return factorial(num);
+        }
+
+        if (expression.back() == '!') {
+            double num = stod(expression.substr(0, expression.size() - 1));
+            return factorial(num);
+        }
+
+        if (expression.find('^') != string::npos) {
+            size_t pos = expression.find('^');
+            double base = stod(expression.substr(0, pos));
+            double exponent = stod(expression.substr(pos + 1));
+            return pow(base, exponent);
+        }
+
+        size_t open_bracket = expression.find('(');
+        if (open_bracket != string::npos) {
+            string func_name = expression.substr(0, open_bracket);
+            string args_str = expression.substr(open_bracket + 1, expression.size() - open_bracket - 2);
+            return eval_(func_name, args_str);
+        }
+
+        return stod(expression);
+
+    } catch (exception& e) {
+        throw runtime_error("éË®°™† Æ°‡†°Æ‚™® ¢Î‡†¶•≠®Ô: " + string(e.what()));
+    }
+}
+
+double eval_(const string& func_name, const string& args_str) {
     if (FUNCTIONS.find(func_name) == FUNCTIONS.end()) {
-        throw runtime_error("–ù–µ–ø–æ–¥–¥–µ—Ä–∂–∏–≤–∞–µ–º–∞—è —Ñ—É–Ω–∫—Ü–∏—è: " + func_name);
+        throw runtime_error("ç•ØÆ§§•‡¶®¢†•¨†Ô ‰„≠™Ê®Ô: " + func_name);
     }
 
     vector<double> args;
@@ -71,78 +103,13 @@ double evaluateFunction(string func_name, const string& args_str) {
     return FUNCTIONS[func_name](args);
 }
 
-double calculate(string expression) {
-    try {
-        expression = preprocess_expression(expression);
-
-        expression.erase(remove(expression.begin(), expression.end(), ' '), expression.end());
-
-        stack<double> values;
-        stack<char> ops;
-
-        auto applyOperation = [](double a, double b, char op) -> double {
-            switch (op) {
-                case '+': return a + b;
-                case '-': return a - b;
-                case '*': return a * b;
-                case '/': return (b != 0) ? a / b : throw runtime_error("–î–µ–ª–µ–Ω–∏–µ –Ω–∞ –Ω–æ–ª—å!");
-                default: throw runtime_error("–ù–µ–∏–∑–≤–µ—Å—Ç–Ω–∞—è –æ–ø–µ—Ä–∞—Ü–∏—è.");
-            }
-        };
-
-        for (size_t i = 0; i < expression.length(); ++i) {
-            if (isdigit(expression[i]) || expression[i] == '.') {
-                size_t end_pos;
-                double value = stod(expression.substr(i), &end_pos);
-                values.push(value);
-                i += end_pos - 1;
-            } else if (expression[i] == '(') {
-                ops.push(expression[i]);
-            } else if (expression[i] == ')') {
-                while (!ops.empty() && ops.top() != '(') {
-                    double b = values.top(); values.pop();
-                    double a = values.top(); values.pop();
-                    char op = ops.top(); ops.pop();
-                    values.push(applyOperation(a, b, op));
-                }
-                if (!ops.empty() && ops.top() == '(') {
-                    ops.pop();
-                }
-
-            } else if (string("+-*/").find(expression[i]) != string::npos) {
-                while (!ops.empty() && string("*/").find(ops.top()) != string::npos && string("+-").find(expression[i]) != string::npos) {
-                    double b = values.top(); values.pop();
-                    double a = values.top(); values.pop();
-                    char op = ops.top(); ops.pop();
-                    values.push(applyOperation(a, b, op));
-                }
-                ops.push(expression[i]);
-            } else {
-                throw runtime_error("–ù–µ–∫–æ—Ä—Ä–µ–∫—Ç–Ω—ã–π —Å–∏–º–≤–æ–ª –≤ –≤—ã—Ä–∞–∂–µ–Ω–∏–∏.");
-            }
-        }
-
-        while (!ops.empty()) {
-            double b = values.top(); values.pop();
-            double a = values.top(); values.pop();
-            char op = ops.top(); ops.pop();
-            values.push(applyOperation(a, b, op));
-        }
-
-        return values.top();
-
-    } catch (exception& e) {
-        throw runtime_error("–û—à–∏–±–∫–∞ –æ–±—Ä–∞–±–æ—Ç–∫–∏ –≤—ã—Ä–∞–∂–µ–Ω–∏—è: " + string(e.what()));
-    }
-}
-
 void menu() {
-    cout << "=== –ö–∞–ª—å–∫—É–ª—è—Ç–æ—Ä ===" << endl;
-    cout << "1. –í–≤–µ—Å—Ç–∏ –≤—ã—Ä–∞–∂–µ–Ω–∏–µ" << endl;
-    cout << "2. –ü–æ–∫–∞–∑–∞—Ç—å –∏—Å—Ç–æ—Ä–∏—é" << endl;
-    cout << "3. –û—á–∏—Å—Ç–∏—Ç—å –∏—Å—Ç–æ—Ä–∏—é" << endl;
-    cout << "4. –í—ã—Ö–æ–¥" << endl;
-    cout << "–í—ã–±–µ—Ä–∏—Ç–µ –ø—É–Ω–∫—Ç: ";
+    cout << "=== ä†´Ï™„´Ô‚Æ‡ ===" << endl;
+    cout << "1. Ç¢•·‚® ¢Î‡†¶•≠®•" << endl;
+    cout << "2. èÆ™†ß†‚Ï ®·‚Æ‡®Ó" << endl;
+    cout << "3. éÁ®·‚®‚Ï ®·‚Æ‡®Ó" << endl;
+    cout << "4. ÇÎÂÆ§" << endl;
+    cout << "ÇÎ°•‡®‚• Ø„≠™‚: ";
 }
 
 int main() {
@@ -150,17 +117,22 @@ int main() {
         menu();
         int choice;
         cin >> choice;
-
+        if (cin.fail()) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "ç•™Æ‡‡•™‚≠Î© ¢¢Æ§. èÆ¶†´„©·‚†, ØÆØ‡Æ°„©‚• •ÈÒ ‡†ß." << endl;
+            continue;
+        }
         switch (choice) {
             case 1: {
-                cout << "–í–≤–µ–¥–∏—Ç–µ –≤—ã—Ä–∞–∂–µ–Ω–∏–µ: ";
+                cout << "Ç¢•§®‚• ¢Î‡†¶•≠®•: ";
                 string expression;
                 cin.ignore();
                 getline(cin, expression);
 
                 try {
                     double result = calculate(expression);
-                    cout << "–†–µ–∑—É–ª—å—Ç–∞—Ç: " << result << endl;
+                    cout << "ê•ß„´Ï‚†‚: " << result << endl;
                     history.push_back(expression + " = " + to_string(result));
                 } catch (exception &e) {
                     cout << e.what() << endl;
@@ -168,20 +140,19 @@ int main() {
                 break;
             }
             case 2:
-                cout << "–ò—Å—Ç–æ—Ä–∏—è –≤—ã—á–∏—Å–ª–µ–Ω–∏–π:" << endl;
+                cout << "à·‚Æ‡®Ô ¢ÎÁ®·´•≠®©:" << endl;
                 for (const string& entry : history) {
                     cout << entry << endl;
                 }
                 break;
             case 3:
                 history.clear();
-                cout << "–ò—Å—Ç–æ—Ä–∏—è —É—Å–ø–µ—à–Ω–æ –æ—á–∏—â–µ–Ω–∞." << endl;
+                cout << "à·‚Æ‡®Ô „·Ø•Ë≠Æ ÆÁ®È•≠†." << endl;
                 break;
             case 4:
-                cout << "–í—ã—Ö–æ–¥ –∏–∑ –ø—Ä–æ–≥—Ä–∞–º–º—ã." << endl;
                 return 0;
             default:
-                cout << "–ù–µ–≤–µ—Ä–Ω—ã–π –≤—ã–±–æ—Ä. –ü–æ–ø—Ä–æ–±—É–π—Ç–µ —Å–Ω–æ–≤–∞." << endl;
+                cout << "ç•¢•‡≠Î© ¢Î°Æ‡. èÆØ‡Æ°„©‚• ·≠Æ¢†." << endl;
         }
     }
 }

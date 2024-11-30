@@ -108,6 +108,7 @@ double calculate(string expression) {
                 if (!ops.empty() && ops.top() == '(') {
                     ops.pop();
                 }
+
             } else if (string("+-*/").find(expression[i]) != string::npos) {
                 while (!ops.empty() && string("*/").find(ops.top()) != string::npos && string("+-").find(expression[i]) != string::npos) {
                     double b = values.top(); values.pop();

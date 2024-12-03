@@ -80,7 +80,6 @@ double calculate(string expression) {
             string args_str = expression.substr(open_bracket + 1, expression.size() - open_bracket - 2);
             return eval_(func_name, args_str);
         }
-
         return stod(expression);
 
     } catch (exception& e) {

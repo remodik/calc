@@ -1,208 +1,201 @@
 #include <iostream>
-#include <cstdio>
-#include <cstdlib>
 #include <cmath>
+#include <cstdlib>
 #include <cstring>
-#include <limits>
-#include <sstream>
-#define MAX_INPUT_LENGTH 256
-
+#include <cctype>
 using namespace std;
 
-// Функция для вычисления факториала
-double factorial(int n) {
-    if (n < 0) return -1; // Ошибка для отрицательных чисел
+// Факториал
+double fact(int n) {
+    if (n < 0) return 0;
     double result = 1;
-    for (int i = 1; i <= n; ++i) {
+    for (int i = 2; i <= n; ++i) {
         result *= i;
     }
     return result;
 }
 
-// Функция для вычисления логарифма
-double custom_log(double base, double value) {
-    return log(value) / log(base);
+// Логарифм
+double logFunc(double base, double value) {
+    if (base <= 0 || base == 1 || value <= 0) {
+        cout << "Ошибка: Некорректные параметры для логарифма.\n";
+        return 0;
+    }
+    return log(value) / log(base); // Формула для логарифма по произвольному основанию
 }
 
-// Функция для выполнения операции
-double calculate(double num1, char op, double num2) {
+// Функция для выполнения арифметических операций
+double performOp(double a, double b, char op) {
     switch (op) {
-        case '+': return num1 + num2;
-        case '-': return num1 - num2;
-        case '*': return num1 * num2;
-        case '/': return num2 != 0 ? num1 / num2 : NAN; // Деление на 0
-        case '^': return pow(num1, num2);
-        default: return NAN; // Неизвестная операция
+        case '+': return a + b;
+        case '-': return a - b;
+        case '*': return a * b;
+        case '/':
+            if (b != 0) return a / b;
+            else {
+                cout << "Ошибка: Деление на ноль!\n";
+                return 0;
+            }
+        default:
+            cout << "Ошибка: Неизвестная операция " << op << endl;
+            return 0;
     }
 }
 
-// Разбор и выполнение сложных операций
-double evaluateExpression(const char* input) {
-    char temp[MAX_INPUT_LENGTH];
-    strncpy(temp, input, MAX_INPUT_LENGTH);
-
-    // Проверка на логарифм (log(base, value))
-    if (strncmp(temp, "log(", 4) == 0) {
-        char* params = temp + 4;
-        char* comma = strchr(params, ',');
-        char* end = strchr(params, ')');
-        if (comma && end) {
-            *comma = '\0';
-            *end = '\0';
-            double base = atof(params);
-            double value = atof(comma + 1);
-            return custom_log(base, value);
-        }
-    }
-
-    // Обработка выражений с помощью stringstream
-    std::stringstream ss(temp);
-    double result = 0, num = 0;
-    char op = '+';
-
-    while (ss >> num) {
-        // Проверка на факториал (!число)
-        if (ss.peek() == '!') {
-            ss.get(); // Убираем '!'
-            num = factorial(static_cast<int>(num)); // Вычисляем факториал
-        }
-        // Выполнение операции
-        switch (op) {
-            case '+': result += num; break;
-            case '-': result -= num; break;
-            case '*': result *= num; break;
-            case '/': result /= num; break;
-            case '^': result = pow(result, num); break; // Степень
-        }
-        ss >> op; // Считываем следующий оператор
-    }
-
-    return result;
+// Проверка приоритета операторов
+int precedence(char op) {
+    if (op == '+' || op == '-') return 1;
+    if (op == '*' || op == '/') return 2;
+    if (op == '!') return 3; // Высокий приоритет для факториала
+    return 0;
 }
 
-// Функция меню
+// Основная функция для вычисления выражений
+double eval(const char* expr) {
+    double values[100]; // Стек чисел
+    char operators[100]; // Стек операторов
+    int valuesTop = -1, operatorsTop = -1;
+
+    for (int i = 0; expr[i] != '\0'; ++i) {
+        if (isdigit(expr[i]) || expr[i] == '.') {
+            // Чтение числа
+            double num = 0;
+            double frac = 0;
+            int fracDiv = 1;
+            bool isFraction = false;
+
+            while (isdigit(expr[i]) || expr[i] == '.') {
+                if (expr[i] == '.') {
+                    isFraction = true;
+                } else if (!isFraction) {
+                    num = num * 10 + (expr[i] - '0');
+                } else {
+                    frac = frac * 10 + (expr[i] - '0');
+                    fracDiv *= 10;
+                }
+                i++;
+            }
+            num += frac / fracDiv;
+            values[++valuesTop] = num;
+            i--; // Возвращаемся на шаг назад
+        } else if (expr[i] == '(') {
+            operators[++operatorsTop] = expr[i];
+        } else if (expr[i] == ')') {
+            while (operatorsTop >= 0 && operators[operatorsTop] != '(') {
+                if (operators[operatorsTop] == '!') {
+                    // Обработка факториала
+                    double a = values[valuesTop--];
+                    values[++valuesTop] = fact(int(a)); // Преобразуем в int
+                    operatorsTop--;
+                } else {
+                    double b = values[valuesTop--];
+                    double a = values[valuesTop--];
+                    char op = operators[operatorsTop--];
+                    values[++valuesTop] = performOp(a, b, op);
+                }
+            }
+            operatorsTop--; // Убираем '('
+        } else if (expr[i] == '!' || expr[i] == '+' || expr[i] == '-' ||
+                   expr[i] == '*' || expr[i] == '/') {
+            while (operatorsTop >= 0 && precedence(operators[operatorsTop]) >= precedence(expr[i])) {
+                if (operators[operatorsTop] == '!') {
+                    // Обработка факториала
+                    double a = values[valuesTop--];
+                    values[++valuesTop] = fact(int(a)); // Преобразуем в int
+                    operatorsTop--;
+                } else {
+                    double b = values[valuesTop--];
+                    double a = values[valuesTop--];
+                    char op = operators[operatorsTop--];
+                    values[++valuesTop] = performOp(a, b, op);
+                }
+            }
+            operators[++operatorsTop] = expr[i];
+        } else if (strncmp(&expr[i], "log", 3) == 0) {
+            // Обработка логарифма
+            i += 3; // Пропускаем "log"
+            if (expr[i] == '(') {
+                i++; // Пропускаем '('
+                double base = 0, value = 0;
+                bool readingBase = true;
+                while (expr[i] != ',') {
+                    base = base * 10 + (expr[i] - '0');
+                    i++;
+                }
+                i++; // Пропускаем запятую
+                while (expr[i] != ')') {
+                    value = value * 10 + (expr[i] - '0');
+                    i++;
+                }
+                values[++valuesTop] = logFunc(base, value);
+            }
+        }
+    }
+
+    while (operatorsTop >= 0) {
+        if (operators[operatorsTop] == '!') {
+            double a = values[valuesTop--];
+            values[++valuesTop] = fact(int(a));
+            operatorsTop--;
+        } else {
+            double b = values[valuesTop--];
+            double a = values[valuesTop--];
+            char op = operators[operatorsTop--];
+            values[++valuesTop] = performOp(a, b, op);
+        }
+    }
+    return values[valuesTop];
+}
+
 void showMenu() {
-    cout << "Калькулятор:\n";
-    cout << "1. Ввод выражения\n";
-    cout << "2. Показать историю\n";
+    cout << "--- Калькулятор ---\n";
+    cout << "1. Ввести выражение\n";
+    cout << "2. Показать историю вычислений\n";
     cout << "3. Очистить историю\n";
-    cout << "4. Выход\n\n";
-}
-
-// Функция для показа истории операций
-void showHistory() {
-    FILE* file = fopen("history.txt", "r");
-    if (!file) {
-        cout << "История пуста.\n";
-        return;
-    }
-    char line[MAX_INPUT_LENGTH];
-    while (fgets(line, sizeof(line), file)) {
-        cout << line;
-    }
-    fclose(file);
-}
-
-// Функция для записи результата в историю
-void saveHistory(const char* input, double result) {
-    FILE* file = fopen("history.txt", "a");
-    if (!file) return;
-    fprintf(file, "%s = %.6f\n", input, result);
-    fclose(file);
-}
-
-// Функция для очистки истории
-void clearHistory() {
-    cout << "Сколько операций очистить (* для очистки всего): ";
-    char input[MAX_INPUT_LENGTH];
-    cin >> input;
-
-    if (strcmp(input, "*") == 0) {
-        // Полная очистка истории
-        FILE* file = fopen("history.txt", "w");
-        if (file) fclose(file);
-        cout << "История полностью очищена.\n";
-    } else {
-        // Очистка указанного количества строк
-        int numToRemove = atoi(input);
-        if (numToRemove <= 0) {
-            cout << "Некорректный ввод.\n";
-            return;
-        }
-
-        FILE* file = fopen("history.txt", "r");
-        if (!file) {
-            cout << "История пуста.\n";
-            return;
-        }
-
-        // Чтение оставшихся строк в память
-        char lines[MAX_INPUT_LENGTH][MAX_INPUT_LENGTH];
-        int count = 0;
-        while (fgets(lines[count], sizeof(lines[count]), file)) {
-            ++count;
-        }
-        fclose(file);
-
-        // Перезапись файла без удаленных строк
-        file = fopen("history.txt", "w");
-        if (!file) return;
-        for (int i = numToRemove; i < count; ++i) {
-            fputs(lines[i], file);
-        }
-        fclose(file);
-        cout << "Удалено " << min(numToRemove, count) << " операций из истории.\n";
-    }
+    cout << "4. Выход\n";
 }
 
 int main() {
-    char input[MAX_INPUT_LENGTH];
+    double result;
+    char expression[100];
+    char history[100][100];
+    int historyIndex = 0;
     int choice;
 
     while (true) {
         showMenu();
-        cout << "Выберите опцию: ";
+        cout << "Выберите действие: ";
         cin >> choice;
+        cin.ignore();  // Для игнорирования символа новой строки после выбора действия
 
-        // Проверка на ошибку ввода
-        if (cin.fail()) {
-            cin.clear(); // Сброс флага ошибки
-            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Очистка ввода
-            cout << "Ошибка: введите корректное число.\n";
-            continue; // Возвращаемся в начало цикла
-        }
+        if (choice == 1) {
+            cout << "Введите выражение: ";
+            cin.getline(expression, 100);
+            result = eval(expression);
 
-        switch (choice) {
-            case 1: {
-                cout << "Введите выражение: ";
-                cin.ignore(); // Очистка остатков ввода
-                cin.getline(input, MAX_INPUT_LENGTH);
+            // Сохранение результата в историю
+            sprintf(history[historyIndex], "Выражение: %s, Результат: %.2f", expression, result);
+            historyIndex++;
 
-                double result = evaluateExpression(input);
-                if (!isnan(result)) {
-                    cout << "Результат: " << result << endl;
-                    saveHistory(input, result);
-                } else {
-                    cout << "Ошибка: неверное выражение.\n";
+            cout << "Результат: " << result << endl;
+        } else if (choice == 2) {
+            if (historyIndex == 0) {
+                cout << "История пуста.\n";
+            } else {
+                cout << "--- История вычислений ---\n";
+                for (int i = 0; i < historyIndex; i++) {
+                    cout << history[i] << endl;
                 }
-                break;
             }
-            case 2: {
-                showHistory();
-                break;
-            }
-            case 3: {
-                clearHistory();
-                break;
-            }
-            case 4: {
-                cout << "Выход из программы.\n";
-                return 0; // Завершение программы
-            }
-            default: {
-                cout << "Ошибка: неверный выбор. Введите число от 1 до 4.\n";
-                break;
-            }
+        } else if (choice == 3) {
+            historyIndex = 0;  // Очистка истории
+            cout << "История очищена.\n";
+        } else if (choice == 4) {
+            cout << "Выход...\n";
+            break;
+        } else {
+            cout << "Некорректный выбор! Пожалуйста, выберите снова.\n";
         }
     }
+    return 0;
 }

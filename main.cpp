@@ -5,7 +5,7 @@
 #include <cctype>
 using namespace std;
 
-// î†™‚Æ‡®†´
+// –§–∞–∫—Ç–æ—Ä–∏–∞–ª
 double fact(int n) {
     if (n < 0) return 0;
     double result = 1;
@@ -15,16 +15,16 @@ double fact(int n) {
     return result;
 }
 
-// ãÆ£†‡®‰¨
+// –õ–æ–≥–∞—Ä–∏—Ñ–º
 double logFunc(double base, double value) {
     if (base <= 0 || base == 1 || value <= 0) {
-        cout << "éË®°™†: ç•™Æ‡‡•™‚≠Î• Ø†‡†¨•‚‡Î §´Ô ´Æ£†‡®‰¨†.\n";
+        cout << "–û—à–∏–±–∫–∞: –ù–µ–∫–æ—Ä—Ä–µ–∫—Ç–Ω—ã–µ –ø–∞—Ä–∞–º–µ—Ç—Ä—ã –¥–ª—è –ª–æ–≥–∞—Ä–∏—Ñ–º–∞.\n";
         return 0;
     }
-    return log(value) / log(base); // îÆ‡¨„´† §´Ô ´Æ£†‡®‰¨† ØÆ Ø‡Æ®ß¢Æ´Ï≠Æ¨„ Æ·≠Æ¢†≠®Ó
+    return log(value) / log(base); // –§–æ—Ä–º—É–ª–∞ –¥–ª—è –ª–æ–≥–∞—Ä–∏—Ñ–º–∞ –ø–æ –ø—Ä–æ–∏–∑–≤–æ–ª—å–Ω–æ–º—É –æ—Å–Ω–æ–≤–∞–Ω–∏—é
 }
 
-// î„≠™Ê®Ô §´Ô ¢ÎØÆ´≠•≠®Ô †‡®‰¨•‚®Á•·™®Â ÆØ•‡†Ê®©
+// –§—É–Ω–∫—Ü–∏—è –¥–ª—è –≤—ã–ø–æ–ª–Ω–µ–Ω–∏—è –∞—Ä–∏—Ñ–º–µ—Ç–∏—á–µ—Å–∫–∏—Ö –æ–ø–µ—Ä–∞—Ü–∏–π
 double performOp(double a, double b, char op) {
     switch (op) {
         case '+': return a + b;
@@ -33,32 +33,32 @@ double performOp(double a, double b, char op) {
         case '/':
             if (b != 0) return a / b;
             else {
-                cout << "éË®°™†: Ñ•´•≠®• ≠† ≠Æ´Ï!\n";
+                cout << "–û—à–∏–±–∫–∞: –î–µ–ª–µ–Ω–∏–µ –Ω–∞ –Ω–æ–ª—å!\n";
                 return 0;
             }
         default:
-            cout << "éË®°™†: ç•®ß¢•·‚≠†Ô ÆØ•‡†Ê®Ô " << op << endl;
+            cout << "–û—à–∏–±–∫–∞: –ù–µ–∏–∑–≤–µ—Å—Ç–Ω–∞—è –æ–ø–µ—Ä–∞—Ü–∏—è " << op << endl;
             return 0;
     }
 }
 
-// è‡Æ¢•‡™† Ø‡®Æ‡®‚•‚† ÆØ•‡†‚Æ‡Æ¢
+// –ü—Ä–æ–≤–µ—Ä–∫–∞ –ø—Ä–∏–æ—Ä–∏—Ç–µ—Ç–∞ –æ–ø–µ—Ä–∞—Ç–æ—Ä–æ–≤
 int precedence(char op) {
     if (op == '+' || op == '-') return 1;
     if (op == '*' || op == '/') return 2;
-    if (op == '!') return 3; // ÇÎ·Æ™®© Ø‡®Æ‡®‚•‚ §´Ô ‰†™‚Æ‡®†´†
+    if (op == '!') return 3; // –í—ã—Å–æ–∫–∏–π –ø—Ä–∏–æ—Ä–∏—Ç–µ—Ç –¥–ª—è —Ñ–∞–∫—Ç–æ—Ä–∏–∞–ª–∞
     return 0;
 }
 
-// é·≠Æ¢≠†Ô ‰„≠™Ê®Ô §´Ô ¢ÎÁ®·´•≠®Ô ¢Î‡†¶•≠®©
+// –û—Å–Ω–æ–≤–Ω–∞—è —Ñ—É–Ω–∫—Ü–∏—è –¥–ª—è –≤—ã—á–∏—Å–ª–µ–Ω–∏—è –≤—ã—Ä–∞–∂–µ–Ω–∏–π
 double eval(const char* expr) {
-    double values[100]; // ë‚•™ Á®·•´
-    char operators[100]; // ë‚•™ ÆØ•‡†‚Æ‡Æ¢
+    double values[100]; // –°—Ç–µ–∫ —á–∏—Å–µ–ª
+    char operators[100]; // –°—Ç–µ–∫ –æ–ø–µ—Ä–∞—Ç–æ—Ä–æ–≤
     int valuesTop = -1, operatorsTop = -1;
 
     for (int i = 0; expr[i] != '\0'; ++i) {
         if (isdigit(expr[i]) || expr[i] == '.') {
-            // ó‚•≠®• Á®·´†
+            // –ß—Ç–µ–Ω–∏–µ —á–∏—Å–ª–∞
             double num = 0;
             double frac = 0;
             int fracDiv = 1;
@@ -77,15 +77,15 @@ double eval(const char* expr) {
             }
             num += frac / fracDiv;
             values[++valuesTop] = num;
-            i--; // ÇÆß¢‡†È†•¨·Ô ≠† Ë†£ ≠†ß†§
+            i--; // –í–æ–∑–≤—Ä–∞—â–∞–µ–º—Å—è –Ω–∞ —à–∞–≥ –Ω–∞–∑–∞–¥
         } else if (expr[i] == '(') {
             operators[++operatorsTop] = expr[i];
         } else if (expr[i] == ')') {
             while (operatorsTop >= 0 && operators[operatorsTop] != '(') {
                 if (operators[operatorsTop] == '!') {
-                    // é°‡†°Æ‚™† ‰†™‚Æ‡®†´†
+                    // –û–±—Ä–∞–±–æ—Ç–∫–∞ —Ñ–∞–∫—Ç–æ—Ä–∏–∞–ª–∞
                     double a = values[valuesTop--];
-                    values[++valuesTop] = fact(int(a)); // è‡•Æ°‡†ß„•¨ ¢ int
+                    values[++valuesTop] = fact(int(a)); // –ü—Ä–µ–æ–±—Ä–∞–∑—É–µ–º –≤ int
                     operatorsTop--;
                 } else {
                     double b = values[valuesTop--];
@@ -94,14 +94,14 @@ double eval(const char* expr) {
                     values[++valuesTop] = performOp(a, b, op);
                 }
             }
-            operatorsTop--; // ì°®‡†•¨ '('
+            operatorsTop--; // –£–±–∏—Ä–∞–µ–º '('
         } else if (expr[i] == '!' || expr[i] == '+' || expr[i] == '-' ||
                    expr[i] == '*' || expr[i] == '/') {
             while (operatorsTop >= 0 && precedence(operators[operatorsTop]) >= precedence(expr[i])) {
                 if (operators[operatorsTop] == '!') {
-                    // é°‡†°Æ‚™† ‰†™‚Æ‡®†´†
+                    // –û–±—Ä–∞–±–æ—Ç–∫–∞ —Ñ–∞–∫—Ç–æ—Ä–∏–∞–ª–∞
                     double a = values[valuesTop--];
-                    values[++valuesTop] = fact(int(a)); // è‡•Æ°‡†ß„•¨ ¢ int
+                    values[++valuesTop] = fact(int(a)); // –ü—Ä–µ–æ–±—Ä–∞–∑—É–µ–º –≤ int
                     operatorsTop--;
                 } else {
                     double b = values[valuesTop--];
@@ -112,17 +112,17 @@ double eval(const char* expr) {
             }
             operators[++operatorsTop] = expr[i];
         } else if (strncmp(&expr[i], "log", 3) == 0) {
-            // é°‡†°Æ‚™† ´Æ£†‡®‰¨†
-            i += 3; // è‡ÆØ„·™†•¨ "log"
+            // –û–±—Ä–∞–±–æ—Ç–∫–∞ –ª–æ–≥–∞—Ä–∏—Ñ–º–∞
+            i += 3; // –ü—Ä–æ–ø—É—Å–∫–∞–µ–º "log"
             if (expr[i] == '(') {
-                i++; // è‡ÆØ„·™†•¨ '('
+                i++; // –ü—Ä–æ–ø—É—Å–∫–∞–µ–º '('
                 double base = 0, value = 0;
                 bool readingBase = true;
                 while (expr[i] != ',') {
                     base = base * 10 + (expr[i] - '0');
                     i++;
                 }
-                i++; // è‡ÆØ„·™†•¨ ß†ØÔ‚„Ó
+                i++; // –ü—Ä–æ–ø—É—Å–∫–∞–µ–º –∑–∞–ø—è—Ç—É—é
                 while (expr[i] != ')') {
                     value = value * 10 + (expr[i] - '0');
                     i++;
@@ -148,11 +148,11 @@ double eval(const char* expr) {
 }
 
 void showMenu() {
-    cout << "--- ä†´Ï™„´Ô‚Æ‡ ---\n";
-    cout << "1. Ç¢•·‚® ¢Î‡†¶•≠®•\n";
-    cout << "2. èÆ™†ß†‚Ï ®·‚Æ‡®Ó ¢ÎÁ®·´•≠®©\n";
-    cout << "3. éÁ®·‚®‚Ï ®·‚Æ‡®Ó\n";
-    cout << "4. ÇÎÂÆ§\n";
+    cout << "--- –ö–∞–ª—å–∫—É–ª—è—Ç–æ—Ä ---\n";
+    cout << "1. –í–≤–µ—Å—Ç–∏ –≤—ã—Ä–∞–∂–µ–Ω–∏–µ\n";
+    cout << "2. –ü–æ–∫–∞–∑–∞—Ç—å –∏—Å—Ç–æ—Ä–∏—é –≤—ã—á–∏—Å–ª–µ–Ω–∏–π\n";
+    cout << "3. –û—á–∏—Å—Ç–∏—Ç—å –∏—Å—Ç–æ—Ä–∏—é\n";
+    cout << "4. –í—ã—Ö–æ–¥\n";
 }
 
 int main() {
@@ -164,37 +164,37 @@ int main() {
 
     while (true) {
         showMenu();
-        cout << "ÇÎ°•‡®‚• §•©·‚¢®•: ";
+        cout << "–í—ã–±–µ—Ä–∏—Ç–µ –¥–µ–π—Å—Ç–≤–∏–µ: ";
         cin >> choice;
-        cin.ignore();  // Ñ´Ô ®£≠Æ‡®‡Æ¢†≠®Ô ·®¨¢Æ´† ≠Æ¢Æ© ·‚‡Æ™® ØÆ·´• ¢Î°Æ‡† §•©·‚¢®Ô
+        cin.ignore();  // –î–ª—è –∏–≥–Ω–æ—Ä–∏—Ä–æ–≤–∞–Ω–∏—è —Å–∏–º–≤–æ–ª–∞ –Ω–æ–≤–æ–π —Å—Ç—Ä–æ–∫–∏ –ø–æ—Å–ª–µ –≤—ã–±–æ—Ä–∞ –¥–µ–π—Å—Ç–≤–∏—è
 
         if (choice == 1) {
-            cout << "Ç¢•§®‚• ¢Î‡†¶•≠®•: ";
+            cout << "–í–≤–µ–¥–∏—Ç–µ –≤—ã—Ä–∞–∂–µ–Ω–∏–µ: ";
             cin.getline(expression, 100);
             result = eval(expression);
 
-            // ëÆÂ‡†≠•≠®• ‡•ß„´Ï‚†‚† ¢ ®·‚Æ‡®Ó
-            sprintf(history[historyIndex], "ÇÎ‡†¶•≠®•: %s, ê•ß„´Ï‚†‚: %.2f", expression, result);
+            // –°–æ—Ö—Ä–∞–Ω–µ–Ω–∏–µ —Ä–µ–∑—É–ª—å—Ç–∞—Ç–∞ –≤ –∏—Å—Ç–æ—Ä–∏—é
+            sprintf(history[historyIndex], "–í—ã—Ä–∞–∂–µ–Ω–∏–µ: %s, –†–µ–∑—É–ª—å—Ç–∞—Ç: %.2f", expression, result);
             historyIndex++;
 
-            cout << "ê•ß„´Ï‚†‚: " << result << endl;
+            cout << "–†–µ–∑—É–ª—å—Ç–∞—Ç: " << result << endl;
         } else if (choice == 2) {
             if (historyIndex == 0) {
-                cout << "à·‚Æ‡®Ô Ø„·‚†.\n";
+                cout << "–ò—Å—Ç–æ—Ä–∏—è –ø—É—Å—Ç–∞.\n";
             } else {
-                cout << "--- à·‚Æ‡®Ô ¢ÎÁ®·´•≠®© ---\n";
+                cout << "--- –ò—Å—Ç–æ—Ä–∏—è –≤—ã—á–∏—Å–ª–µ–Ω–∏–π ---\n";
                 for (int i = 0; i < historyIndex; i++) {
                     cout << history[i] << endl;
                 }
             }
         } else if (choice == 3) {
-            historyIndex = 0;  // éÁ®·‚™† ®·‚Æ‡®®
-            cout << "à·‚Æ‡®Ô ÆÁ®È•≠†.\n";
+            historyIndex = 0;  // –û—á–∏—Å—Ç–∫–∞ –∏—Å—Ç–æ—Ä–∏–∏
+            cout << "–ò—Å—Ç–æ—Ä–∏—è –æ—á–∏—â–µ–Ω–∞.\n";
         } else if (choice == 4) {
-            cout << "ÇÎÂÆ§...\n";
+            cout << "–í—ã—Ö–æ–¥...\n";
             break;
         } else {
-            cout << "ç•™Æ‡‡•™‚≠Î© ¢Î°Æ‡! èÆ¶†´„©·‚†, ¢Î°•‡®‚• ·≠Æ¢†.\n";
+            cout << "–ù–µ–∫–æ—Ä—Ä–µ–∫—Ç–Ω—ã–π –≤—ã–±–æ—Ä! –ü–æ–∂–∞–ª—É–π—Å—Ç–∞, –≤—ã–±–µ—Ä–∏—Ç–µ —Å–Ω–æ–≤–∞.\n";
         }
     }
     return 0;

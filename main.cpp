@@ -3,9 +3,10 @@
 #include <cstdlib>
 #include <cstring>
 #include <cctype>
+#include <fstream> // ��� ࠡ��� � 䠩����
 using namespace std;
 
-// Факториал
+// ����ਠ�
 double fact(int n) {
     if (n < 0) return 0;
     double result = 1;
@@ -15,16 +16,21 @@ double fact(int n) {
     return result;
 }
 
-// Логарифм
+// ������
 double logFunc(double base, double value) {
     if (base <= 0 || base == 1 || value <= 0) {
-        cout << "Ошибка: Некорректные параметры для логарифма.\n";
+        cout << "�訡��: �����४�� ��ࠬ���� ��� �����䬠.\n";
         return 0;
     }
-    return log(value) / log(base); // Формула для логарифма по произвольному основанию
+    return log(value) / log(base);
 }
 
-// Функция для выполнения арифметических операций
+// ���������� � �⥯���
+double power(double base, double exp) {
+    return pow(base, exp);
+}
+
+// �㭪�� ��� �믮������ ��䬥��᪨� ����権
 double performOp(double a, double b, char op) {
     switch (op) {
         case '+': return a + b;
@@ -33,34 +39,34 @@ double performOp(double a, double b, char op) {
         case '/':
             if (b != 0) return a / b;
             else {
-                cout << "Ошибка: Деление на ноль!\n";
+                cout << "�訡��: ������� �� ����!\n";
                 return 0;
             }
+        case '^': return power(a, b);
         default:
-            cout << "Ошибка: Неизвестная операция " << op << endl;
+            cout << "�訡��: �������⭠� ������ " << op << endl;
             return 0;
     }
 }
 
-// Проверка приоритета операторов
+// �஢�ઠ �ਮ��� �����஢
 int precedence(char op) {
     if (op == '+' || op == '-') return 1;
     if (op == '*' || op == '/') return 2;
-    if (op == '!') return 3; // Высокий приоритет для факториала
+    if (op == '^') return 3; // ��᮪�� �ਮ��� ��� ���������� � �⥯���
+    if (op == '!') return 4; // ���訩 �ਮ��� ��� 䠪�ਠ��
     return 0;
 }
 
-// Основная функция для вычисления выражений
+// �᭮���� �㭪�� ��� ���᫥��� ��ࠦ����
 double eval(const char* expr) {
-    double values[100]; // Стек чисел
-    char operators[100]; // Стек операторов
+    double values[100];
+    char operators[100];
     int valuesTop = -1, operatorsTop = -1;
 
     for (int i = 0; expr[i] != '\0'; ++i) {
         if (isdigit(expr[i]) || expr[i] == '.') {
-            // Чтение числа
-            double num = 0;
-            double frac = 0;
+            double num = 0, frac = 0;
             int fracDiv = 1;
             bool isFraction = false;
 
@@ -77,52 +83,45 @@ double eval(const char* expr) {
             }
             num += frac / fracDiv;
             values[++valuesTop] = num;
-            i--; // Возвращаемся на шаг назад
+            i--;
         } else if (expr[i] == '(') {
             operators[++operatorsTop] = expr[i];
         } else if (expr[i] == ')') {
             while (operatorsTop >= 0 && operators[operatorsTop] != '(') {
-                if (operators[operatorsTop] == '!') {
-                    // Обработка факториала
+                char op = operators[operatorsTop--];
+                if (op == '!') {
                     double a = values[valuesTop--];
-                    values[++valuesTop] = fact(int(a)); // Преобразуем в int
-                    operatorsTop--;
+                    values[++valuesTop] = fact(int(a));
                 } else {
                     double b = values[valuesTop--];
                     double a = values[valuesTop--];
-                    char op = operators[operatorsTop--];
                     values[++valuesTop] = performOp(a, b, op);
                 }
             }
-            operatorsTop--; // Убираем '('
-        } else if (expr[i] == '!' || expr[i] == '+' || expr[i] == '-' ||
-                   expr[i] == '*' || expr[i] == '/') {
+            operatorsTop--;
+        } else if (strchr("+-*/^!", expr[i])) {
             while (operatorsTop >= 0 && precedence(operators[operatorsTop]) >= precedence(expr[i])) {
-                if (operators[operatorsTop] == '!') {
-                    // Обработка факториала
+                char op = operators[operatorsTop--];
+                if (op == '!') {
                     double a = values[valuesTop--];
-                    values[++valuesTop] = fact(int(a)); // Преобразуем в int
-                    operatorsTop--;
+                    values[++valuesTop] = fact(int(a));
                 } else {
                     double b = values[valuesTop--];
                     double a = values[valuesTop--];
-                    char op = operators[operatorsTop--];
                     values[++valuesTop] = performOp(a, b, op);
                 }
             }
             operators[++operatorsTop] = expr[i];
         } else if (strncmp(&expr[i], "log", 3) == 0) {
-            // Обработка логарифма
-            i += 3; // Пропускаем "log"
+            i += 3;
             if (expr[i] == '(') {
-                i++; // Пропускаем '('
+                i++;
                 double base = 0, value = 0;
-                bool readingBase = true;
                 while (expr[i] != ',') {
                     base = base * 10 + (expr[i] - '0');
                     i++;
                 }
-                i++; // Пропускаем запятую
+                i++;
                 while (expr[i] != ')') {
                     value = value * 10 + (expr[i] - '0');
                     i++;
@@ -133,26 +132,38 @@ double eval(const char* expr) {
     }
 
     while (operatorsTop >= 0) {
-        if (operators[operatorsTop] == '!') {
+        char op = operators[operatorsTop--];
+        if (op == '!') {
             double a = values[valuesTop--];
             values[++valuesTop] = fact(int(a));
-            operatorsTop--;
         } else {
             double b = values[valuesTop--];
             double a = values[valuesTop--];
-            char op = operators[operatorsTop--];
             values[++valuesTop] = performOp(a, b, op);
         }
     }
     return values[valuesTop];
 }
 
+void saveHistoryToFile(const char history[][100], int historyIndex) {
+    ofstream outFile("history.txt", ios::out);
+    if (!outFile) {
+        cout << "�訡��: �� 㤠���� ������ 䠩� ��� �����.\n";
+        return;
+    }
+    for (int i = 0; i < historyIndex; ++i) {
+        outFile << history[i] << endl;
+    }
+    outFile.close();
+}
+
 void showMenu() {
-    cout << "--- Калькулятор ---\n";
-    cout << "1. Ввести выражение\n";
-    cout << "2. Показать историю вычислений\n";
-    cout << "3. Очистить историю\n";
-    cout << "4. Выход\n";
+    cout << "--- �������� ---\n";
+    cout << "1. ����� ��ࠦ����\n";
+    cout << "2. �������� ����� ���᫥���\n";
+    cout << "3. ������ �����\n";
+    cout << "4. ���࠭��� ����� � 䠩�\n";
+    cout << "5. ��室\n";
 }
 
 int main() {
@@ -164,37 +175,39 @@ int main() {
 
     while (true) {
         showMenu();
-        cout << "Выберите действие: ";
+        cout << "�롥�� ����⢨�: ";
         cin >> choice;
-        cin.ignore();  // Для игнорирования символа новой строки после выбора действия
+        cin.ignore();
 
         if (choice == 1) {
-            cout << "Введите выражение: ";
+            cout << "������ ��ࠦ����: ";
             cin.getline(expression, 100);
             result = eval(expression);
 
-            // Сохранение результата в историю
-            sprintf(history[historyIndex], "Выражение: %s, Результат: %.2f", expression, result);
+            sprintf(history[historyIndex], "��ࠦ����: %s, �������: %.2f", expression, result);
             historyIndex++;
 
-            cout << "Результат: " << result << endl;
+            cout << "�������: " << result << endl;
         } else if (choice == 2) {
             if (historyIndex == 0) {
-                cout << "История пуста.\n";
+                cout << "����� ����.\n";
             } else {
-                cout << "--- История вычислений ---\n";
+                cout << "--- ����� ���᫥��� ---\n";
                 for (int i = 0; i < historyIndex; i++) {
                     cout << history[i] << endl;
                 }
             }
         } else if (choice == 3) {
-            historyIndex = 0;  // Очистка истории
-            cout << "История очищена.\n";
+            historyIndex = 0;
+            cout << "����� ��饭�.\n";
         } else if (choice == 4) {
-            cout << "Выход...\n";
+            saveHistoryToFile(history, historyIndex);
+            cout << "����� ��࠭��� � 䠩� history.txt\n";
+        } else if (choice == 5) {
+            cout << "��室...\n";
             break;
         } else {
-            cout << "Некорректный выбор! Пожалуйста, выберите снова.\n";
+            cout << "�����४�� �롮�! ��������, �롥�� ᭮��.\n";
         }
     }
     return 0;

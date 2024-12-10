@@ -5,7 +5,21 @@
 #include <fstream>
 using namespace std;
 
-// Ð¤Ð°ÐºÑ‚Ð¾Ñ€Ð¸Ð°Ð»
+// ”ã­ªæ¨ï ¤«ï ¯à®¢¥àª¨ ¢ëà ¦¥­¨ï ­  ¢ «¨¤­®áâì
+bool validateExpression(const char* expr, int& errorPos) {
+    for (int i = 0; expr[i] != '\0'; ++i) {
+        if (!(isdigit(expr[i]) || expr[i] == '.' || expr[i] == '+' || expr[i] == '-' ||
+              expr[i] == '*' || expr[i] == '/' || expr[i] == '^' || expr[i] == '(' ||
+              expr[i] == ')' || isspace(expr[i]))) {
+            cout << "Žè¨¡ª : ¥¨§¢¥áâ­ë© á¨¬¢®«: " << expr[i] << "\n®§¨æ¨ï: " << i << endl;
+            errorPos = i; // ‘®åà ­ï¥¬ ¯®§¨æ¨î ­¥ª®àà¥ªâ­®£® á¨¬¢®« 
+            return false;
+        }
+    }
+    return true;
+}
+
+// ” ªâ®à¨ «
 double fact(int n) {
     if (n < 0) return 0;
     double result = 1;
@@ -15,21 +29,21 @@ double fact(int n) {
     return result;
 }
 
-// Ð›Ð¾Ð³Ð°Ñ€Ð¸Ñ„Ð¼
+// ‹®£ à¨ä¬
 double logFunc(double base, double value) {
     if (base <= 0 || base == 1 || value <= 0) {
-        cout << "ÐžÑˆÐ¸Ð±ÐºÐ°: ÐÐµÐºÐ¾Ñ€Ñ€ÐµÐºÑ‚Ð½Ñ‹Ðµ Ð¿Ð°Ñ€Ð°Ð¼ÐµÑ‚Ñ€Ñ‹ Ð´Ð»Ñ Ð»Ð¾Ð³Ð°Ñ€Ð¸Ñ„Ð¼Ð°.\n";
+        cout << "Žè¨¡ª : ¥ª®àà¥ªâ­ë¥ ¯ à ¬¥âàë ¤«ï «®£ à¨ä¬ .\n";
         return 0;
     }
     return log(value) / log(base);
 }
 
-// Ð’Ð¾Ð·Ð²ÐµÐ´ÐµÐ½Ð¸Ðµ Ð² ÑÑ‚ÐµÐ¿ÐµÐ½ÑŒ
+// ‚®§¢¥¤¥­¨¥ ¢ áâ¥¯¥­ì
 double power(double base, double exp) {
     return pow(base, exp);
 }
 
-// Ð¤ÑƒÐ½ÐºÑ†Ð¸Ñ Ð´Ð»Ñ Ð²Ñ‹Ð¿Ð¾Ð»Ð½ÐµÐ½Ð¸Ñ Ð°Ñ€Ð¸Ñ„Ð¼ÐµÑ‚Ð¸Ñ‡ÐµÑÐºÐ¸Ñ… Ð¾Ð¿ÐµÑ€Ð°Ñ†Ð¸Ð¹
+// ”ã­ªæ¨ï ¤«ï ¢ë¯®«­¥­¨ï  à¨ä¬¥â¨ç¥áª¨å ®¯¥à æ¨©
 double performOp(double a, double b, char op) {
     switch (op) {
         case '+': return a + b;
@@ -38,33 +52,35 @@ double performOp(double a, double b, char op) {
         case '/':
             if (b != 0) return a / b;
             else {
-                cout << "ÐžÑˆÐ¸Ð±ÐºÐ°: Ð”ÐµÐ»ÐµÐ½Ð¸Ðµ Ð½Ð° Ð½Ð¾Ð»ÑŒ!\n";
+                cout << "Žè¨¡ª : „¥«¥­¨¥ ­  ­®«ì!\n";
                 return 0;
             }
         case '^': return power(a, b);
         default:
-            cout << "ÐžÑˆÐ¸Ð±ÐºÐ°: ÐÐµÐ¸Ð·Ð²ÐµÑÑ‚Ð½Ð°Ñ Ð¾Ð¿ÐµÑ€Ð°Ñ†Ð¸Ñ " << op << endl;
+            cout << "Žè¨¡ª : ¥¨§¢¥áâ­ ï ®¯¥à æ¨ï " << op << endl;
             return 0;
     }
 }
 
-// ÐŸÑ€Ð¾Ð²ÐµÑ€ÐºÐ° Ð¿Ñ€Ð¸Ð¾Ñ€Ð¸Ñ‚ÐµÑ‚Ð° Ð¾Ð¿ÐµÑ€Ð°Ñ‚Ð¾Ñ€Ð¾Ð²
+// à®¢¥àª  ¯à¨®à¨â¥â  ®¯¥à â®à®¢
 int precedence(char op) {
     if (op == '+' || op == '-') return 1;
     if (op == '*' || op == '/') return 2;
-    if (op == '^') return 3; // Ð’Ñ‹ÑÐ¾ÐºÐ¸Ð¹ Ð¿Ñ€Ð¸Ð¾Ñ€Ð¸Ñ‚ÐµÑ‚ Ð´Ð»Ñ Ð²Ð¾Ð·Ð²ÐµÐ´ÐµÐ½Ð¸Ñ Ð² ÑÑ‚ÐµÐ¿ÐµÐ½ÑŒ
-    if (op == '!') return 4; // Ð’Ñ‹ÑÑˆÐ¸Ð¹ Ð¿Ñ€Ð¸Ð¾Ñ€Ð¸Ñ‚ÐµÑ‚ Ð´Ð»Ñ Ñ„Ð°ÐºÑ‚Ð¾Ñ€Ð¸Ð°Ð»Ð°
+    if (op == '^') return 3; // ‚ëá®ª¨© ¯à¨®à¨â¥â ¤«ï ¢®§¢¥¤¥­¨ï ¢ áâ¥¯¥­ì
+    if (op == '!') return 4; // ‚ëáè¨© ¯à¨®à¨â¥â ¤«ï ä ªâ®à¨ « 
     return 0;
 }
 
-// ÐžÑÐ½Ð¾Ð²Ð½Ð°Ñ Ñ„ÑƒÐ½ÐºÑ†Ð¸Ñ Ð´Ð»Ñ Ð²Ñ‹Ñ‡Ð¸ÑÐ»ÐµÐ½Ð¸Ñ Ð²Ñ‹Ñ€Ð°Ð¶ÐµÐ½Ð¸Ð¹
+// Žá­®¢­ ï äã­ªæ¨ï ¤«ï ¢ëç¨á«¥­¨ï ¢ëà ¦¥­¨©
 double eval(const char* expr) {
     double values[100];
     char operators[100];
     int valuesTop = -1, operatorsTop = -1;
+    bool validExpression = false; // ”« £ ¤«ï ¯à®¢¥àª¨ ­ «¨ç¨ï ª®àà¥ªâ­ëå ®¯¥à æ¨©
 
     for (int i = 0; expr[i] != '\0'; ++i) {
         if (isdigit(expr[i]) || expr[i] == '.') {
+            validExpression = true;
             double num = 0, frac = 0;
             int fracDiv = 1;
             bool isFraction = false;
@@ -87,67 +103,62 @@ double eval(const char* expr) {
             operators[++operatorsTop] = expr[i];
         } else if (expr[i] == ')') {
             while (operatorsTop >= 0 && operators[operatorsTop] != '(') {
-                char op = operators[operatorsTop--];
-                if (op == '!') {
-                    double a = values[valuesTop--];
-                    values[++valuesTop] = fact(int(a));
-                } else {
-                    double b = values[valuesTop--];
-                    double a = values[valuesTop--];
-                    values[++valuesTop] = performOp(a, b, op);
+                if (valuesTop < 1) { // à®¢¥àª  ­  ¤®áâ â®ç­®¥ ª®«¨ç¥áâ¢® ®¯¥à ­¤®¢
+                    cout << "Žè¨¡ª : ¥ª®àà¥ªâ­®¥ ¢ëà ¦¥­¨¥.\n";
+                    return 0;
                 }
+                char op = operators[operatorsTop--];
+                double b = values[valuesTop--];
+                double a = values[valuesTop--];
+                values[++valuesTop] = performOp(a, b, op);
+            }
+            if (operatorsTop < 0 || operators[operatorsTop] != '(') {
+                cout << "Žè¨¡ª : ¥ª®àà¥ªâ­ë¥ áª®¡ª¨.\n";
+                return 0;
             }
             operatorsTop--;
         } else if (strchr("+-*/^!", expr[i])) {
+            validExpression = true;
             while (operatorsTop >= 0 && precedence(operators[operatorsTop]) >= precedence(expr[i])) {
-                char op = operators[operatorsTop--];
-                if (op == '!') {
-                    double a = values[valuesTop--];
-                    values[++valuesTop] = fact(int(a));
-                } else {
-                    double b = values[valuesTop--];
-                    double a = values[valuesTop--];
-                    values[++valuesTop] = performOp(a, b, op);
+                if (valuesTop < 1) {
+                    cout << "Žè¨¡ª : ¥ª®àà¥ªâ­®¥ ¢ëà ¦¥­¨¥.\n";
+                    return 0;
                 }
+                char op = operators[operatorsTop--];
+                double b = values[valuesTop--];
+                double a = values[valuesTop--];
+                values[++valuesTop] = performOp(a, b, op);
             }
             operators[++operatorsTop] = expr[i];
-        } else if (strncmp(&expr[i], "log", 3) == 0) {
-            i += 3;
-            if (expr[i] == '(') {
-                i++;
-                double base = 0, value = 0;
-                while (expr[i] != ',') {
-                    base = base * 10 + (expr[i] - '0');
-                    i++;
-                }
-                i++;
-                while (expr[i] != ')') {
-                    value = value * 10 + (expr[i] - '0');
-                    i++;
-                }
-                values[++valuesTop] = logFunc(base, value);
-            }
+        } else if (isalpha(expr[i])) {
+            cout << "Žè¨¡ª : ¥ª®àà¥ªâ­ë© á¨¬¢®« ¢ ¢ëà ¦¥­¨¨: " << expr[i] << endl;
+            return 0;
         }
     }
 
     while (operatorsTop >= 0) {
-        char op = operators[operatorsTop--];
-        if (op == '!') {
-            double a = values[valuesTop--];
-            values[++valuesTop] = fact(int(a));
-        } else {
-            double b = values[valuesTop--];
-            double a = values[valuesTop--];
-            values[++valuesTop] = performOp(a, b, op);
+        if (valuesTop < 1) {
+            cout << "Žè¨¡ª : ¥ª®àà¥ªâ­®¥ ¢ëà ¦¥­¨¥.\n";
+            return 0;
         }
+        char op = operators[operatorsTop--];
+        double b = values[valuesTop--];
+        double a = values[valuesTop--];
+        values[++valuesTop] = performOp(a, b, op);
     }
-    return values[valuesTop];
+
+    if (!validExpression) {
+        cout << "Žè¨¡ª : ãáâ®¥ ¨«¨ ­¥ª®àà¥ªâ­®¥ ¢ëà ¦¥­¨¥.\n";
+        return 0;
+    }
+
+    return valuesTop == 0 ? values[0] : 0;
 }
 
 void saveHistoryToFile(const char history[][100], int historyIndex) {
     ofstream outFile("history.txt", ios::out);
     if (!outFile) {
-        cout << "ÐžÑˆÐ¸Ð±ÐºÐ°: ÐÐµ ÑƒÐ´Ð°Ð»Ð¾ÑÑŒ Ð¾Ñ‚ÐºÑ€Ñ‹Ñ‚ÑŒ Ñ„Ð°Ð¹Ð» Ð´Ð»Ñ Ð·Ð°Ð¿Ð¸ÑÐ¸.\n";
+        cout << "Žè¨¡ª : ¥ ã¤ «®áì ®âªàëâì ä ©« ¤«ï § ¯¨á¨.\n";
         return;
     }
     for (int i = 0; i < historyIndex; ++i) {
@@ -157,12 +168,12 @@ void saveHistoryToFile(const char history[][100], int historyIndex) {
 }
 
 void showMenu() {
-    cout << "--- ÐšÐ°Ð»ÑŒÐºÑƒÐ»ÑÑ‚Ð¾Ñ€ ---\n";
-    cout << "1. Ð’Ð²ÐµÑÑ‚Ð¸ Ð²Ñ‹Ñ€Ð°Ð¶ÐµÐ½Ð¸Ðµ\n";
-    cout << "2. ÐŸÐ¾ÐºÐ°Ð·Ð°Ñ‚ÑŒ Ð¸ÑÑ‚Ð¾Ñ€Ð¸ÑŽ Ð²Ñ‹Ñ‡Ð¸ÑÐ»ÐµÐ½Ð¸Ð¹\n";
-    cout << "3. ÐžÑ‡Ð¸ÑÑ‚Ð¸Ñ‚ÑŒ Ð¸ÑÑ‚Ð¾Ñ€Ð¸ÑŽ\n";
-    cout << "4. Ð¡Ð¾Ñ…Ñ€Ð°Ð½Ð¸Ñ‚ÑŒ Ð¸ÑÑ‚Ð¾Ñ€Ð¸ÑŽ Ð² Ñ„Ð°Ð¹Ð»\n";
-    cout << "5. Ð’Ñ‹Ñ…Ð¾Ð´\n";
+    cout << "--- Š «ìªã«ïâ®à ---\n";
+    cout << "1. ‚¢¥áâ¨ ¢ëà ¦¥­¨¥\n";
+    cout << "2. ®ª § âì ¨áâ®à¨î ¢ëç¨á«¥­¨©\n";
+    cout << "3. Žç¨áâ¨âì ¨áâ®à¨î\n";
+    cout << "4. ‘®åà ­¨âì ¨áâ®à¨î ¢ ä ©«\n";
+    cout << "5. ‚ëå®¤\n";
 }
 
 int main() {
@@ -174,39 +185,54 @@ int main() {
 
     while (true) {
         showMenu();
-        cout << "Ð’Ñ‹Ð±ÐµÑ€Ð¸Ñ‚Ðµ Ð´ÐµÐ¹ÑÑ‚Ð²Ð¸Ðµ: ";
+        cout << "‚ë¡¥à¨â¥ ¤¥©áâ¢¨¥: ";
         cin >> choice;
         cin.ignore();
 
         if (choice == 1) {
-            cout << "Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ Ð²Ñ‹Ñ€Ð°Ð¶ÐµÐ½Ð¸Ðµ: ";
+            cout << "‚¢¥¤¨â¥ ¢ëà ¦¥­¨¥: ";
             cin.getline(expression, 100);
+
+            int errorPos;
+            if (!validateExpression(expression, errorPos)) {
+                cout << expression << endl;
+                for (int i = 0; i < errorPos; ++i) cout << " ";
+                cout << "^\nŽè¨¡ª : ¥¨§¢¥áâ­ë© á¨¬¢®«\n";
+                continue;
+            }
+
             result = eval(expression);
+            cout << "¥§ã«ìâ â: " << result << endl;
 
-            sprintf(history[historyIndex], "Ð’Ñ‹Ñ€Ð°Ð¶ÐµÐ½Ð¸Ðµ: %s, Ð ÐµÐ·ÑƒÐ»ÑŒÑ‚Ð°Ñ‚: %.2f", expression, result);
-            historyIndex++;
-
-            cout << "Ð ÐµÐ·ÑƒÐ»ÑŒÑ‚Ð°Ñ‚: " << result << endl;
+            // ‘®åà ­¥­¨¥ ¢ ¨áâ®à¨î
+            if (historyIndex < 100) { // Ž£à ­¨ç¥­¨¥ à §¬¥à  ¨áâ®à¨¨
+                snprintf(history[historyIndex], 100, "‚ëà ¦¥­¨¥: %s, ¥§ã«ìâ â: %.2f", expression, result);
+                ++historyIndex;
+            } else {
+                cout << "ˆáâ®à¨ï § ¯®«­¥­ , ­®¢ ï § ¯¨áì ­¥¢®§¬®¦­ .\n";
+            }
         } else if (choice == 2) {
             if (historyIndex == 0) {
-                cout << "Ð˜ÑÑ‚Ð¾Ñ€Ð¸Ñ Ð¿ÑƒÑÑ‚Ð°.\n";
+                cout << "ˆáâ®à¨ï ¯ãáâ .\n";
             } else {
-                cout << "--- Ð˜ÑÑ‚Ð¾Ñ€Ð¸Ñ Ð²Ñ‹Ñ‡Ð¸ÑÐ»ÐµÐ½Ð¸Ð¹ ---\n";
+                cout << "--- ˆáâ®à¨ï ¢ëç¨á«¥­¨© ---\n";
                 for (int i = 0; i < historyIndex; i++) {
                     cout << history[i] << endl;
                 }
             }
         } else if (choice == 3) {
             historyIndex = 0;
-            cout << "Ð˜ÑÑ‚Ð¾Ñ€Ð¸Ñ Ð¾Ñ‡Ð¸Ñ‰ÐµÐ½Ð°.\n";
+            cout << "\b=====================\n";
+            cout << "ˆáâ®à¨ï ®ç¨é¥­ .\n";
+            cout << "=====================\n";
         } else if (choice == 4) {
             saveHistoryToFile(history, historyIndex);
-            cout << "Ð˜ÑÑ‚Ð¾Ñ€Ð¸Ñ ÑÐ¾Ñ…Ñ€Ð°Ð½ÐµÐ½Ð° Ð² Ñ„Ð°Ð¹Ð» history.txt\n";
+            cout << "ˆáâ®à¨ï á®åà ­¥­  ¢ ä ©« history.txt\n";
         } else if (choice == 5) {
-            cout << "Ð’Ñ‹Ñ…Ð¾Ð´...\n";
+            cout << "‚ëå®¤...\n";
             break;
         } else {
-            cout << "ÐÐµÐºÐ¾Ñ€Ñ€ÐµÐºÑ‚Ð½Ñ‹Ð¹ Ð²Ñ‹Ð±Ð¾Ñ€! ÐŸÐ¾Ð¶Ð°Ð»ÑƒÐ¹ÑÑ‚Ð°, Ð²Ñ‹Ð±ÐµÑ€Ð¸Ñ‚Ðµ ÑÐ½Ð¾Ð²Ð°.\n";
+            cout << "¥ª®àà¥ªâ­ë© ¢ë¡®à! ®¦ «ã©áâ , ¢ë¡¥à¨â¥ á­®¢ .\n";
         }
     }
     return 0;

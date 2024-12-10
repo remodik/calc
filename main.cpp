@@ -1,9 +1,8 @@
 #include <iostream>
 #include <cmath>
-#include <cstdlib>
 #include <cstring>
 #include <cctype>
-#include <fstream> // Для работы с файлами
+#include <fstream>
 using namespace std;
 
 // Факториал

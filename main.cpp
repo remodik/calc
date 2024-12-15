@@ -1,18 +1,17 @@
 #include <iostream>
-#include <cmath>
 #include <cstring>
 #include <cctype>
+#include <cmath>
 #include <fstream>
 using namespace std;
 
-// Функция для проверки выражения на валидность
-bool validateExpression(const char* expr, int& errorPos) {
+// Функция для проверки выражения
+bool validateExpression(const char* expr) {
     for (int i = 0; expr[i] != '\0'; ++i) {
-        if (!(isdigit(expr[i]) || expr[i] == '.' || expr[i] == '+' || expr[i] == '-' ||
-              expr[i] == '*' || expr[i] == '/' || expr[i] == '^' || expr[i] == '(' ||
-              expr[i] == ')' || isspace(expr[i]))) {
-            cout << "Ошибка: Неизвестный символ: " << expr[i] << "\nПозиция: " << i << endl;
-            errorPos = i; // Сохраняем позицию некорректного символа
+        // Проверяем символы: цифры, операторы, скобки, пробелы и "log"
+        if (!(isdigit(expr[i]) || strchr("+-*/^()!., ", expr[i]) ||
+              (strncmp(&expr[i], "log", 3) == 0) || isalpha(expr[i]))) {
+            cout << "Ошибка: Неизвестный символ: " << expr[i] << " на позиции " << i << endl;
             return false;
         }
     }
@@ -43,7 +42,7 @@ double power(double base, double exp) {
     return pow(base, exp);
 }
 
-// Функция для выполнения арифметических операций
+// Выполнение операций
 double performOp(double a, double b, char op) {
     switch (op) {
         case '+': return a + b;
@@ -51,14 +50,10 @@ double performOp(double a, double b, char op) {
         case '*': return a * b;
         case '/':
             if (b != 0) return a / b;
-            else {
-                cout << "Ошибка: Деление на ноль!\n";
-                return 0;
-            }
-        case '^': return power(a, b);
-        default:
-            cout << "Ошибка: Неизвестная операция " << op << endl;
+            cout << "Ошибка: Деление на ноль!\n";
             return 0;
+        case '^': return power(a, b);
+        default: return 0;
     }
 }
 
@@ -66,25 +61,24 @@ double performOp(double a, double b, char op) {
 int precedence(char op) {
     if (op == '+' || op == '-') return 1;
     if (op == '*' || op == '/') return 2;
-    if (op == '^') return 3; // Высокий приоритет для возведения в степень
-    if (op == '!') return 4; // Высший приоритет для факториала
+    if (op == '^') return 3;
     return 0;
 }
 
-// Основная функция для вычисления выражений
+// Вычисление выражения
 double eval(const char* expr) {
     double values[100];
     char operators[100];
-    int valuesTop = -1, operatorsTop = -1;
-    bool validExpression = false; // Флаг для проверки наличия корректных операций
+    int valTop = -1, opTop = -1;
+    int i = 0;
 
-    for (int i = 0; expr[i] != '\0'; ++i) {
+    while (expr[i] != '\0') {
         if (isdigit(expr[i]) || expr[i] == '.') {
-            validExpression = true;
             double num = 0, frac = 0;
             int fracDiv = 1;
             bool isFraction = false;
 
+            // Считываем число с возможной дробной частью
             while (isdigit(expr[i]) || expr[i] == '.') {
                 if (expr[i] == '.') {
                     isFraction = true;
@@ -97,64 +91,71 @@ double eval(const char* expr) {
                 i++;
             }
             num += frac / fracDiv;
-            values[++valuesTop] = num;
-            i--;
+            values[++valTop] = num;
         } else if (expr[i] == '(') {
-            operators[++operatorsTop] = expr[i];
+            operators[++opTop] = expr[i];
+            i++;
         } else if (expr[i] == ')') {
-            while (operatorsTop >= 0 && operators[operatorsTop] != '(') {
-                if (valuesTop < 1) { // Проверка на достаточное количество операндов
-                    cout << "Ошибка: Некорректное выражение.\n";
+            while (opTop >= 0 && operators[opTop] != '(') {
+                double b = values[valTop--];
+                double a = values[valTop--];
+                char op = operators[opTop--];
+                values[++valTop] = performOp(a, b, op);
+            }
+            opTop--;  // Убираем '('
+            i++;
+        } else if (strncmp(&expr[i], "log", 3) == 0) {
+            i += 3;
+            if (expr[i] == '(') {
+                i++;
+                double base = 0, value = 0;
+                sscanf(&expr[i], "%lf,%lf", &base, &value);
+
+                // Пропустить параметры до ')'
+                while (expr[i] != ')' && expr[i] != '\0') i++;
+
+                if (expr[i] == ')') {
+                    i++; // Пропускаем ')'
+                    values[++valTop] = logFunc(base, value);
+                } else {
+                    cout << "Ошибка: Некорректный формат функции log. Ожидается log(base,value).\n";
                     return 0;
                 }
-                char op = operators[operatorsTop--];
-                double b = values[valuesTop--];
-                double a = values[valuesTop--];
-                values[++valuesTop] = performOp(a, b, op);
-            }
-            if (operatorsTop < 0 || operators[operatorsTop] != '(') {
-                cout << "Ошибка: Некорректные скобки.\n";
+            } else {
+                cout << "Ошибка: Некорректный формат функции log. Ожидается log(base,value).\n";
                 return 0;
             }
-            operatorsTop--;
-        } else if (strchr("+-*/^!", expr[i])) {
-            validExpression = true;
-            while (operatorsTop >= 0 && precedence(operators[operatorsTop]) >= precedence(expr[i])) {
-                if (valuesTop < 1) {
-                    cout << "Ошибка: Некорректное выражение.\n";
-                    return 0;
-                }
-                char op = operators[operatorsTop--];
-                double b = values[valuesTop--];
-                double a = values[valuesTop--];
-                values[++valuesTop] = performOp(a, b, op);
+        } else if (expr[i] == '!') {
+            double a = values[valTop--];
+            values[++valTop] = fact((int)a);
+            i++;
+        } else if (strchr("+-*/^", expr[i])) {
+            // Обрабатываем операторы с учётом приоритета
+            while (opTop >= 0 && precedence(operators[opTop]) >= precedence(expr[i])) {
+                double b = values[valTop--];
+                double a = values[valTop--];
+                char op = operators[opTop--];
+                values[++valTop] = performOp(a, b, op);
             }
-            operators[++operatorsTop] = expr[i];
-        } else if (isalpha(expr[i])) {
-            cout << "Ошибка: Некорректный символ в выражении: " << expr[i] << endl;
-            return 0;
+            operators[++opTop] = expr[i];
+            i++;
+        } else {
+            i++;
         }
     }
 
-    while (operatorsTop >= 0) {
-        if (valuesTop < 1) {
-            cout << "Ошибка: Некорректное выражение.\n";
-            return 0;
-        }
-        char op = operators[operatorsTop--];
-        double b = values[valuesTop--];
-        double a = values[valuesTop--];
-        values[++valuesTop] = performOp(a, b, op);
+    // Выполнение оставшихся операций
+    while (opTop >= 0) {
+        double b = values[valTop--];
+        double a = values[valTop--];
+        char op = operators[opTop--];
+        values[++valTop] = performOp(a, b, op);
     }
 
-    if (!validExpression) {
-        cout << "Ошибка: Пустое или некорректное выражение.\n";
-        return 0;
-    }
-
-    return valuesTop == 0 ? values[0] : 0;
+    return values[valTop];
 }
 
+// Сохранение истории
 void saveHistoryToFile(const char history[][100], int historyIndex) {
     ofstream outFile("history.txt", ios::out);
     if (!outFile) {
@@ -167,6 +168,7 @@ void saveHistoryToFile(const char history[][100], int historyIndex) {
     outFile.close();
 }
 
+// Меню
 void showMenu() {
     cout << "--- Калькулятор ---\n";
     cout << "1. Ввести выражение\n";
@@ -193,38 +195,30 @@ int main() {
             cout << "Введите выражение: ";
             cin.getline(expression, 100);
 
-            int errorPos;
-            if (!validateExpression(expression, errorPos)) {
-                cout << expression << endl;
-                for (int i = 0; i < errorPos; ++i) cout << " ";
-                cout << "^\nОшибка: Неизвестный символ\n";
+            if (!validateExpression(expression)) {
                 continue;
             }
 
             result = eval(expression);
             cout << "Результат: " << result << endl;
 
-            // Сохранение в историю
-            if (historyIndex < 100) { // Ограничение размера истории
+            if (historyIndex < 100) {
                 snprintf(history[historyIndex], 100, "Выражение: %s, Результат: %.2f", expression, result);
                 ++historyIndex;
             } else {
-                cout << "История заполнена, новая запись невозможна.\n";
+                cout << "История заполнена.\n";
             }
         } else if (choice == 2) {
             if (historyIndex == 0) {
                 cout << "История пуста.\n";
             } else {
-                cout << "--- История вычислений ---\n";
                 for (int i = 0; i < historyIndex; i++) {
                     cout << history[i] << endl;
                 }
             }
         } else if (choice == 3) {
             historyIndex = 0;
-            cout << "\b=====================\n";
             cout << "История очищена.\n";
-            cout << "=====================\n";
         } else if (choice == 4) {
             saveHistoryToFile(history, historyIndex);
             cout << "История сохранена в файл history.txt\n";
@@ -232,8 +226,7 @@ int main() {
             cout << "Выход...\n";
             break;
         } else {
-            cout << "Некорректный выбор! Пожалуйста, выберите снова.\n";
+            cout << "Некорректный выбор!\n";
         }
     }
-    return 0;
 }

@@ -5,20 +5,20 @@
 #include <fstream>
 using namespace std;
 
-// î„≠™Ê®Ô §´Ô Ø‡Æ¢•‡™® ¢Î‡†¶•≠®Ô
+// –§—É–Ω–∫—Ü–∏—è –¥–ª—è –ø—Ä–æ–≤–µ—Ä–∫–∏ –≤—ã—Ä–∞–∂–µ–Ω–∏—è
 bool validExpr(const char* expr) {
     for (int i = 0; expr[i] != '\0'; ++i) {
-        // è‡Æ¢•‡Ô•¨ ·®¨¢Æ´Î: Ê®‰‡Î, ÆØ•‡†‚Æ‡Î, ·™Æ°™®, Ø‡Æ°•´Î ® "log"
+        // –ü—Ä–æ–≤–µ—Ä—è–µ–º —Å–∏–º–≤–æ–ª—ã: —Ü–∏—Ñ—Ä—ã, –æ–ø–µ—Ä–∞—Ç–æ—Ä—ã, —Å–∫–æ–±–∫–∏, –ø—Ä–æ–±–µ–ª—ã –∏ "log"
         if (!(isdigit(expr[i]) || strchr("+-*/^()!., ", expr[i]) ||
               (strncmp(&expr[i], "log", 3) == 0) || isalpha(expr[i]))) {
-            cout << "éË®°™†: ç•®ß¢•·‚≠Î© ·®¨¢Æ´: " << expr[i] << " ≠† ØÆß®Ê®® " << i << endl;
+            cout << "–û—à–∏–±–∫–∞: –ù–µ–∏–∑–≤–µ—Å—Ç–Ω—ã–π —Å–∏–º–≤–æ–ª: " << expr[i] << " –Ω–∞ –ø–æ–∑–∏—Ü–∏–∏ " << i << endl;
             return false;
         }
     }
     return true;
 }
 
-// î†™‚Æ‡®†´
+// –§–∞–∫—Ç–æ—Ä–∏–∞–ª
 double fact(int n) {
     if (n < 0) return 0;
     if (n == 0) return 1;
@@ -29,21 +29,21 @@ double fact(int n) {
     return result;
 }
 
-// ãÆ£†‡®‰¨
+// –õ–æ–≥–∞—Ä–∏—Ñ–º
 double logFunc(double base, double value) {
     if (base <= 0 || base == 1 || value <= 0) {
-        cout << "éË®°™†: ç•™Æ‡‡•™‚≠Î• Ø†‡†¨•‚‡Î §´Ô ´Æ£†‡®‰¨†.\n";
+        cout << "–û—à–∏–±–∫–∞: –ù–µ–∫–æ—Ä—Ä–µ–∫—Ç–Ω—ã–µ –ø–∞—Ä–∞–º–µ—Ç—Ä—ã –¥–ª—è –ª–æ–≥–∞—Ä–∏—Ñ–º–∞.\n";
         return 0;
     }
     return log(value) / log(base);
 }
 
-// ÇÆß¢•§•≠®• ¢ ·‚•Ø•≠Ï
+// –í–æ–∑–≤–µ–¥–µ–Ω–∏–µ –≤ —Å—Ç–µ–ø–µ–Ω—å
 double power(double base, double exp) {
     return pow(base, exp);
 }
 
-// ÇÎØÆ´≠•≠®• ÆØ•‡†Ê®©
+// –í—ã–ø–æ–ª–Ω–µ–Ω–∏–µ –æ–ø–µ—Ä–∞—Ü–∏–π
 double performOp(double a, double b, char op) {
     switch (op) {
         case '+': return a + b;
@@ -51,14 +51,14 @@ double performOp(double a, double b, char op) {
         case '*': return a * b;
         case '/':
             if (b != 0) return a / b;
-            cout << "éË®°™†: Ñ•´•≠®• ≠† ≠Æ´Ï!\n";
+            cout << "–û—à–∏–±–∫–∞: –î–µ–ª–µ–Ω–∏–µ –Ω–∞ –Ω–æ–ª—å!\n";
             return 0;
         case '^': return power(a, b);
         default: return 0;
     }
 }
 
-// è‡Æ¢•‡™† Ø‡®Æ‡®‚•‚† ÆØ•‡†‚Æ‡Æ¢
+// –ü—Ä–æ–≤–µ—Ä–∫–∞ –ø—Ä–∏–æ—Ä–∏—Ç–µ—Ç–∞ –æ–ø–µ—Ä–∞—Ç–æ—Ä–æ–≤
 int precedence(char op) {
     if (op == '+' || op == '-') return 1;
     if (op == '*' || op == '/') return 2;
@@ -66,7 +66,7 @@ int precedence(char op) {
     return 0;
 }
 
-// ÇÎÁ®·´•≠®• ¢Î‡†¶•≠®Ô
+// –í—ã—á–∏—Å–ª–µ–Ω–∏–µ –≤—ã—Ä–∞–∂–µ–Ω–∏—è
 double eval(const char* expr) {
     double values[100];
     char operators[100];
@@ -79,7 +79,7 @@ double eval(const char* expr) {
             int fracDiv = 1;
             bool isFraction = false;
 
-            // ëÁ®‚Î¢†•¨ Á®·´Æ · ¢Æß¨Æ¶≠Æ© §‡Æ°≠Æ© Á†·‚ÏÓ
+            // –°—á–∏—Ç—ã–≤–∞–µ–º —á–∏—Å–ª–æ —Å –≤–æ–∑–º–æ–∂–Ω–æ–π –¥—Ä–æ–±–Ω–æ–π —á–∞—Å—Ç—å—é
             while (isdigit(expr[i]) || expr[i] == '.') {
                 if (expr[i] == '.') {
                     isFraction = true;
@@ -103,7 +103,7 @@ double eval(const char* expr) {
                 char op = operators[opTop--];
                 values[++valTop] = performOp(a, b, op);
             }
-            opTop--;  // ì°®‡†•¨ '('
+            opTop--;  // –£–±–∏—Ä–∞–µ–º '('
             i++;
         } else if (strncmp(&expr[i], "log", 3) == 0) {
             i += 3;
@@ -112,18 +112,18 @@ double eval(const char* expr) {
                 double base = 0, value = 0;
                 sscanf(&expr[i], "%lf,%lf", &base, &value);
 
-                // è‡ÆØ„·‚®‚Ï Ø†‡†¨•‚‡Î §Æ ')'
+                // –ü—Ä–æ–ø—É—Å—Ç–∏—Ç—å –ø–∞—Ä–∞–º–µ—Ç—Ä—ã –¥–æ ')'
                 while (expr[i] != ')' && expr[i] != '\0') i++;
 
                 if (expr[i] == ')') {
-                    i++; // è‡ÆØ„·™†•¨ ')'
+                    i++; // –ü—Ä–æ–ø—É—Å–∫–∞–µ–º ')'
                     values[++valTop] = logFunc(base, value);
                 } else {
-                    cout << "éË®°™†: ç•™Æ‡‡•™‚≠Î© ‰Æ‡¨†‚ ‰„≠™Ê®® log. é¶®§†•‚·Ô log(base,value).\n";
+                    cout << "–û—à–∏–±–∫–∞: –ù–µ–∫–æ—Ä—Ä–µ–∫—Ç–Ω—ã–π —Ñ–æ—Ä–º–∞—Ç —Ñ—É–Ω–∫—Ü–∏–∏ log. –û–∂–∏–¥–∞–µ—Ç—Å—è log(base,value).\n";
                     return 0;
                 }
             } else {
-                cout << "éË®°™†: ç•™Æ‡‡•™‚≠Î© ‰Æ‡¨†‚ ‰„≠™Ê®® log. é¶®§†•‚·Ô log(base,value).\n";
+                cout << "–û—à–∏–±–∫–∞: –ù–µ–∫–æ—Ä—Ä–µ–∫—Ç–Ω—ã–π —Ñ–æ—Ä–º–∞—Ç —Ñ—É–Ω–∫—Ü–∏–∏ log. –û–∂–∏–¥–∞–µ—Ç—Å—è log(base,value).\n";
                 return 0;
             }
         } else if (expr[i] == '!') {
@@ -131,7 +131,7 @@ double eval(const char* expr) {
             values[++valTop] = fact((int)a);
             i++;
         } else if (strchr("+-*/^", expr[i])) {
-            // é°‡†°†‚Î¢†•¨ ÆØ•‡†‚Æ‡Î · „ÁÒ‚Æ¨ Ø‡®Æ‡®‚•‚†
+            // –û–±—Ä–∞–±–∞—Ç—ã–≤–∞–µ–º –æ–ø–µ—Ä–∞—Ç–æ—Ä—ã —Å —É—á—ë—Ç–æ–º –ø—Ä–∏–æ—Ä–∏—Ç–µ—Ç–∞
             while (opTop >= 0 && precedence(operators[opTop]) >= precedence(expr[i])) {
                 double b = values[valTop--];
                 double a = values[valTop--];
@@ -145,7 +145,7 @@ double eval(const char* expr) {
         }
     }
 
-    // ÇÎØÆ´≠•≠®• Æ·‚†¢Ë®Â·Ô ÆØ•‡†Ê®©
+    // –í—ã–ø–æ–ª–Ω–µ–Ω–∏–µ –æ—Å—Ç–∞–≤—à–∏—Ö—Å—è –æ–ø–µ—Ä–∞—Ü–∏–π
     while (opTop >= 0) {
         double b = values[valTop--];
         double a = values[valTop--];
@@ -156,11 +156,11 @@ double eval(const char* expr) {
     return values[valTop];
 }
 
-// ëÆÂ‡†≠•≠®• ®·‚Æ‡®®
+// –°–æ—Ö—Ä–∞–Ω–µ–Ω–∏–µ –∏—Å—Ç–æ—Ä–∏–∏
 void saveHistory(const char history[][100], int historyIndex) {
     ofstream outFile("history.txt", ios::out);
     if (!outFile) {
-        cout << "éË®°™†: ç• „§†´Æ·Ï Æ‚™‡Î‚Ï ‰†©´ §´Ô ß†Ø®·®.\n";
+        cout << "–û—à–∏–±–∫–∞: –ù–µ —É–¥–∞–ª–æ—Å—å –æ—Ç–∫—Ä—ã—Ç—å —Ñ–∞–π–ª –¥–ª—è –∑–∞–ø–∏—Å–∏.\n";
         return;
     }
     for (int i = 0; i < historyIndex; ++i) {
@@ -169,14 +169,14 @@ void saveHistory(const char history[][100], int historyIndex) {
     outFile.close();
 }
 
-// å•≠Ó
+// –ú–µ–Ω—é
 void showMenu() {
-    cout << "--- ä†´Ï™„´Ô‚Æ‡ ---\n";
-    cout << "1. Ç¢•·‚® ¢Î‡†¶•≠®•\n";
-    cout << "2. èÆ™†ß†‚Ï ®·‚Æ‡®Ó ¢ÎÁ®·´•≠®©\n";
-    cout << "3. éÁ®·‚®‚Ï ®·‚Æ‡®Ó\n";
-    cout << "4. ëÆÂ‡†≠®‚Ï ®·‚Æ‡®Ó ¢ ‰†©´\n";
-    cout << "5. ÇÎÂÆ§\n";
+    cout << "--- –ö–∞–ª—å–∫—É–ª—è—Ç–æ—Ä ---\n";
+    cout << "1. –í–≤–µ—Å—Ç–∏ –≤—ã—Ä–∞–∂–µ–Ω–∏–µ\n";
+    cout << "2. –ü–æ–∫–∞–∑–∞—Ç—å –∏—Å—Ç–æ—Ä–∏—é –≤—ã—á–∏—Å–ª–µ–Ω–∏–π\n";
+    cout << "3. –û—á–∏—Å—Ç–∏—Ç—å –∏—Å—Ç–æ—Ä–∏—é\n";
+    cout << "4. –°–æ—Ö—Ä–∞–Ω–∏—Ç—å –∏—Å—Ç–æ—Ä–∏—é –≤ —Ñ–∞–π–ª\n";
+    cout << "5. –í—ã—Ö–æ–¥\n";
 }
 
 int main() {
@@ -188,12 +188,12 @@ int main() {
 
     while (true) {
         showMenu();
-        cout << "ÇÎ°•‡®‚• §•©·‚¢®•: ";
+        cout << "–í—ã–±–µ—Ä–∏—Ç–µ –¥–µ–π—Å—Ç–≤–∏–µ: ";
         cin >> choice;
         cin.ignore();
 
         if (choice == 1) {
-            cout << "Ç¢•§®‚• ¢Î‡†¶•≠®•: ";
+            cout << "–í–≤–µ–¥–∏—Ç–µ –≤—ã—Ä–∞–∂–µ–Ω–∏–µ: ";
             cin.getline(expression, 100);
 
             if (!validExpr(expression)) {
@@ -201,17 +201,17 @@ int main() {
             }
 
             result = eval(expression);
-            cout << "ê•ß„´Ï‚†‚: " << result << endl;
+            cout << "–†–µ–∑—É–ª—å—Ç–∞—Ç: " << result << endl;
 
             if (historyIndex < 100) {
-                snprintf(history[historyIndex], 100, "ÇÎ‡†¶•≠®•: %s, ê•ß„´Ï‚†‚: %.2f", expression, result);
+                snprintf(history[historyIndex], 100, "–í—ã—Ä–∞–∂–µ–Ω–∏–µ: %s, –†–µ–∑—É–ª—å—Ç–∞—Ç: %.2f", expression, result);
                 ++historyIndex;
             } else {
-                cout << "à·‚Æ‡®Ô ß†ØÆ´≠•≠†.\n";
+                cout << "–ò—Å—Ç–æ—Ä–∏—è –∑–∞–ø–æ–ª–Ω–µ–Ω–∞.\n";
             }
         } else if (choice == 2) {
             if (historyIndex == 0) {
-                cout << "à·‚Æ‡®Ô Ø„·‚†.\n";
+                cout << "–ò—Å—Ç–æ—Ä–∏—è –ø—É—Å—Ç–∞.\n";
             } else {
                 for (int i = 0; i < historyIndex; i++) {
                     cout << history[i] << endl;
@@ -219,15 +219,15 @@ int main() {
             }
         } else if (choice == 3) {
             historyIndex = 0;
-            cout << "à·‚Æ‡®Ô ÆÁ®È•≠†.\n";
+            cout << "–ò—Å—Ç–æ—Ä–∏—è –æ—á–∏—â–µ–Ω–∞.\n";
         } else if (choice == 4) {
             saveHistory(history, historyIndex);
-            cout << "à·‚Æ‡®Ô ·ÆÂ‡†≠•≠† ¢ ‰†©´ history.txt\n";
+            cout << "–ò—Å—Ç–æ—Ä–∏—è —Å–æ—Ö—Ä–∞–Ω–µ–Ω–∞ –≤ —Ñ–∞–π–ª history.txt\n";
         } else if (choice == 5) {
-            cout << "ÇÎÂÆ§...\n";
+            cout << "–í—ã—Ö–æ–¥...\n";
             break;
         } else {
-            cout << "ç•™Æ‡‡•™‚≠Î© ¢Î°Æ‡!\n";
+            cout << "–ù–µ–∫–æ—Ä—Ä–µ–∫—Ç–Ω—ã–π –≤—ã–±–æ—Ä!\n";
         }
     }
 }
